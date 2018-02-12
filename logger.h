@@ -10,19 +10,9 @@
 #include <fstream>
 
 #include "date.h"
+#include "logger_sink.h"
 
 namespace logger {
-
-class logger_sink {
-public:
-        virtual void open (const std::string& name) = 0;
-        virtual void close () = 0;
-        virtual void write (const std::string& msg) = 0;
-
-        virtual ~logger_sink() = 0;
-};
-
-inline logger_sink::~logger_sink() { }
 
 enum class log_level {
         DEBUG,
@@ -30,6 +20,11 @@ enum class log_level {
         WARNING,
         CRITICAL,
         FATAL
+};
+
+enum class logger_flags {
+        flag_none = 0,
+        flag_time_stamp = 1
 };
 
 template<typename sink> class logger;
@@ -55,8 +50,9 @@ template<typename sink> void logd (logger<sink>* logger)
 
 template<typename sink> class logger {
         std::chrono::high_resolution_clock::time_point reference_epoch;
-        unsigned line;
+        unsigned seq_no;
         log_level severity;
+        logger_flags flags;
         sink destination;
         std::timed_mutex wr_mtx;
         std::vector<std::string> log_buffer;
@@ -70,7 +66,8 @@ template<typename sink> class logger {
                         Tail&&... t);
 
 public:
-        logger(const std::string& name, log_level min_severity);
+        logger(const std::string& name, log_level min_severity,
+               logger_flags flags = logger_flags::flag_time_stamp);
         ~logger();
 
         void set_logging_level (log_level new_level);
@@ -101,11 +98,13 @@ template<typename sink>
                 return;
 
         std::stringstream stream;
-        auto now = std::chrono::system_clock::now ();
 
-        {
-                using namespace date;
-                stream << line++ << " " << now << " ";
+        stream << seq_no++ << " ";
+
+        if (flags == logger_flags::flag_time_stamp) {
+            auto now = std::chrono::system_clock::now ();
+            using namespace date;
+            stream << now << " ";
         }
 
         stream << thread_name [std::this_thread::get_id ()] <<" ";
@@ -153,8 +152,9 @@ template<typename sink>
 }
 
 template<typename sink> logger<sink>::logger(const std::string& name,
-                                             log_level min_severity) :
-        line(0), severity(min_severity)
+                                             log_level min_severity,
+                                             logger_flags flags) :
+        seq_no(0), severity(min_severity), flags(flags)
 {
         destination.open (name);
         reference_epoch = std::chrono::high_resolution_clock::now ();
@@ -176,18 +176,6 @@ template<typename sink> logger<sink>::~logger()
         destination.write ("logger terminated");
         destination.close ();
 }
-
-class file_logger_sink : public logger_sink {
-        std::ofstream out;
-
-public:
-        file_logger_sink() { }
-        ~file_logger_sink() { }
-
-        void open (const std::string& name) override;
-        void close () override;
-        void write (const std::string& message) override;
-};
 
 }
 
