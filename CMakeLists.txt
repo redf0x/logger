@@ -14,6 +14,8 @@ set(SOURCES
     console_logger.cpp
     file_logger.h
     file_logger.cpp
+    syslog_logger.h
+    syslog_logger.cpp
     date.h
 )
 
@@ -23,3 +25,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 1)
 
 add_executable(log-test log-test.c clog.h)
 target_link_libraries(log-test ${PROJECT_NAME})
+
+add_executable("log-test++" log-test.cpp log.h)
+target_link_libraries("log-test++" ${PROJECT_NAME})
