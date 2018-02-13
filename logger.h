@@ -7,7 +7,6 @@
 #include <vector>
 #include <thread>
 #include <map>
-#include <fstream>
 
 #include "date.h"
 #include "logger_sink.h"
