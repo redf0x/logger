@@ -5,26 +5,26 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
 
 set(SOURCES
-    core.cpp
-    log.h
-    clog.h
-    logger.h
-    logger_sink.h
-    console_logger.h
-    console_logger.cpp
-    file_logger.h
-    file_logger.cpp
-    syslog_logger.h
-    syslog_logger.cpp
-    date.h
+    src/core.cpp
+    include/log.h
+    include/clog.h
+    include/logger.h
+    include/logger_sink.h
+    include/console_logger.h
+    src/console_logger.cpp
+    include/file_logger.h
+    src/file_logger.cpp
+    include/syslog_logger.h
+    src/syslog_logger.cpp
+    include/date.h
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION 1.0.0)
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 1)
 
-add_executable(log-test log-test.c clog.h)
+add_executable(log-test log-test.c include/clog.h)
 target_link_libraries(log-test ${PROJECT_NAME})
 
-add_executable("log-test++" log-test.cpp log.h)
+add_executable("log-test++" log-test.cpp include/log.h)
 target_link_libraries("log-test++" ${PROJECT_NAME})
