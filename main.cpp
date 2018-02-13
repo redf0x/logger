@@ -6,9 +6,11 @@
 #include "log.h"
 #include "clog.h"
 
+#include "syslog_logger.h"
+
 namespace logger {
 
-logger<console_logger_sink> _log("", log_level::DEBUG, logger_flags::flag_none);
+logger<syslog_logger_sink> _log("test-id", log_level::DEBUG, logger_flags::flag_none);
 
 #define __log_debug _log.log<log_level::DEBUG>
 #define __log_info  _log.log<log_level::INFO>
@@ -85,28 +87,28 @@ void stub_log_info (const char* caller, unsigned line, const char* format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    log_message_internal (logger::log_level::DEBUG, caller, line, format, ap);
+    log_message_internal (logger::log_level::INFO, caller, line, format, ap);
 }
 
 void stub_log_warning (const char* caller, unsigned line, const char* format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    log_message_internal (logger::log_level::DEBUG, caller, line, format, ap);
+    log_message_internal (logger::log_level::WARNING, caller, line, format, ap);
 }
 
 void stub_log_critical (const char* caller, unsigned line, const char* format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    log_message_internal (logger::log_level::DEBUG, caller, line, format, ap);
+    log_message_internal (logger::log_level::CRITICAL, caller, line, format, ap);
 }
 
 void stub_log_fatal (const char* caller, unsigned line, const char* format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    log_message_internal (logger::log_level::DEBUG, caller, line, format, ap);
+    log_message_internal (logger::log_level::FATAL, caller, line, format, ap);
 }
 
 #ifdef LOGGER_TEST
